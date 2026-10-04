@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiv Sadan (शिव सदन) - Property Management Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        accent: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .active-tab {
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .modal-blur {
+            backdrop-filter: blur(6px);
+        }
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="flex flex-col gap-2"></div>
+
+    <header class="bg-gradient-to-r from-brand-900 via-brand-800 to-brand-900 text-white py-5 px-4 shadow-lg border-b border-brand-800">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight flex items-center justify-center md:justify-start gap-2">
+                    <i class="fa-solid fa-building-user text-accent-500"></i> Shiv Sadan (शिव सदन)
+                </h1>
+                <p class="text-xs md:text-sm text-brand-100 mt-1 flex items-center justify-center md:justify-start gap-1">
+                    <i class="fa-solid fa-location-dot text-accent-500"></i> Jadeshwar Park Street No. 2, Near Radha Krishna Mandir, Rajkot, Gujarat
+                </p>
+            </div>
+            <div class="text-xs md:text-right bg-white/10 px-4 py-2.5 rounded-xl backdrop-blur-md border border-white/15 shadow-inner">
+                <p class="text-brand-100 font-medium"><i class="fa-solid fa-user-shield text-accent-500 mr-1"></i> Owner: <span class="text-white font-bold">Savita Vaniya / Yashraj</span></p>
+                <p class="text-brand-100 mt-0.5"><i class="fa-solid fa-phone text-emerald-400 mr-1"></i> +91 7041724041 | UPI: <span class="font-mono text-emerald-300">7041724041@ybl</span></p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Owner Active Status Bar -->
+    <div id="ownerStatusBar" class="hidden bg-emerald-800 text-white text-xs md:text-sm py-2 px-4 shadow-md">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-emerald-300"></i> <strong>Owner Mode Unlocked & Active</strong></span>
+            <div class="flex items-center gap-2">
+                <button onclick="openChangePasswordModal()" class="bg-emerald-900 hover:bg-emerald-950 px-3 py-1 rounded-lg font-semibold transition text-xs flex items-center gap-1 border border-emerald-700">
+                    <i class="fa-solid fa-key text-accent-500"></i> Change Owner Password
+                </button>
+                <button onclick="ownerLogout()" class="bg-rose-600 hover:bg-rose-700 px-3 py-1 rounded-lg font-semibold transition text-xs flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-slate-900 text-slate-300 sticky top-0 z-40 shadow-md">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center p-2 gap-2">
+            <div class="flex gap-2">
+                <button id="btn-home" onclick="switchTab('home')" class="active-tab px-4 py-2 rounded-lg font-semibold text-xs md:text-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie"></i> Overview & Rules
+                </button>
+                <button id="btn-tenant" onclick="switchTab('tenant')" class="px-4 py-2 rounded-lg font-semibold text-xs md:text-sm hover:bg-slate-800 transition flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-400"></i> Tenant Room Login
+                </button>
+            </div>
+            <div>
+                <button id="btn-owner" onclick="handleOwnerNav()" class="px-4 py-2 rounded-lg font-bold text-xs md:text-sm bg-purple-900 hover:bg-purple-800 text-purple-100 transition flex items-center gap-2 border border-purple-700/50 shadow-sm">
+                    <i class="fa-solid fa-lock"></i> Owner Portal
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+
+        <!-- TAB 1: OVERVIEW & RULES -->
+        <div id="tab-home" class="tab-content space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Shiv Sadan Property Dashboard</h2>
+                        <p class="text-xs text-slate-500 mt-1">15 Residential Units & 2 Commercial Outlets in Rajkot, Gujarat.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="overviewYearSelect" onchange="renderOverviewMetrics()" class="text-xs p-2 rounded-xl border border-slate-300 bg-slate-50 font-bold focus:outline-none">
+                            <!-- Dynamic Years -->
+                        </select>
+                        <select id="overviewMonthSelect" onchange="renderOverviewMetrics()" class="text-xs p-2 rounded-xl border border-slate-300 bg-slate-50 font-bold focus:outline-none">
+                            <!-- Dynamic Months -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- KPI Analytics Cards -->
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <div class="text-2xl font-extrabold text-brand-600">17</div>
+                        <div class="text-[11px] font-bold text-slate-500 uppercase mt-1">Total Units</div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <div id="statOccupied" class="text-2xl font-extrabold text-emerald-600">0</div>
+                        <div class="text-[11px] font-bold text-slate-500 uppercase mt-1">Occupied Units</div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <div id="statExpected" class="text-xl md:text-2xl font-extrabold text-purple-700">₹0</div>
+                        <div class="text-[11px] font-bold text-slate-500 uppercase mt-1">Expected Rent</div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <div id="statCollected" class="text-xl md:text-2xl font-extrabold text-emerald-700">₹0</div>
+                        <div class="text-[11px] font-bold text-slate-500 uppercase mt-1">Collected</div>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center col-span-2 md:col-span-1">
+                        <div id="statOverdue" class="text-2xl font-extrabold text-rose-600">0</div>
+                        <div class="text-[11px] font-bold text-slate-500 uppercase mt-1">Pending Unpaid</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment & Guidelines Section -->
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3">
+                            <i class="fa-solid fa-qrcode text-brand-600"></i> Official Payment Details
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">Pay monthly rent securely using the official UPI handle or scan via any UPI app:</p>
+                        
+                        <div class="bg-amber-50 border-2 border-dashed border-amber-300 rounded-2xl p-4 text-center">
+                            <span class="text-xs text-amber-800 font-semibold uppercase tracking-wider">Official UPI ID</span>
+                            <div class="text-xl font-black text-slate-900 my-1 tracking-wide select-all" id="upiText">7041724041@ybl</div>
+                            <button onclick="copyUPI()" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-1.5 rounded-lg transition mt-2 inline-flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-copy"></i> Copy UPI ID
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex flex-wrap gap-2">
+                        <a href="https://wa.me/917041724041" target="_blank" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition text-center flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Support
+                        </a>
+                        <a href="tel:7041724041" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition text-center flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-phone text-sm"></i> Call Owner
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-book-bookmark text-brand-600"></i> Tenancy Guidelines & Rules
+                    </h3>
+                    <ul class="space-y-3 text-xs text-slate-700">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                            <span><strong>Due Date:</strong> Monthly room rent is due on or before the 5th of every month.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                            <span><strong>Room Password Protection:</strong> Room details are securely unlocked using your room password.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                            <span><strong>Pure Rent Agreement:</strong> Rent covers unit occupancy and routine property upkeep.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                            <span><strong>Identification:</strong> Govt-issued Aadhaar Card copy must be registered with property management.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: TENANT ROOM LOGIN & PORTAL -->
+        <div id="tab-tenant" class="tab-content hidden space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 max-w-2xl mx-auto">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                    <i class="fa-solid fa-key text-amber-500"></i> Tenant Room Portal Login
+                </h2>
+
+                <!-- Room Password Challenge -->
+                <div id="tenantAuthBox" class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4">
+                    <div class="text-center">
+                        <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+                            <i class="fa-solid fa-door-closed"></i>
+                        </div>
+                        <h3 class="text-sm font-bold text-slate-900">Access Unit Ledger</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Select your room/store and enter your assigned password.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Select Unit (Room / Store)</label>
+                        <select id="tenantSelectUnit" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:outline-none bg-white font-medium">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Room Password</label>
+                        <input type="password" id="tenantRoomPassword" placeholder="Enter room password (Default: tenant123)" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                    </div>
+
+                    <div id="tenantAuthError" class="hidden text-xs text-rose-600 font-bold text-center">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Incorrect password for selected unit. Please try again.
+                    </div>
+
+                    <button onclick="authenticateTenant()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-unlock"></i> Unlock Room Ledger
+                    </button>
+                    <p class="text-[11px] text-slate-400 text-center">Note: Default password for all units is <code class="bg-slate-200 text-slate-700 px-1 rounded font-bold">tenant123</code> unless changed by owner.</p>
+                </div>
+
+                <!-- Authenticated Tenant View -->
+                <div id="tenantDashboardView" class="hidden space-y-6">
+                    <div class="flex justify-between items-center bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-emerald-600 text-white rounded-xl flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900" id="tenantActiveUnitTitle">Room Access Granted</h3>
+                                <p class="text-xs text-slate-600">Tenant: <span id="tenantActiveName" class="font-bold text-slate-900"></span></p>
+                            </div>
+                        </div>
+                        <button onclick="lockTenantView()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 py-1.5 rounded-lg font-bold transition">
+                            <i class="fa-solid fa-lock mr-1"></i> Lock Session
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs space-y-2">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            <div><span class="text-slate-500">Monthly Rent:</span> <strong id="tenantActiveRent" class="text-emerald-700 font-extrabold ml-1"></strong></div>
+                            <div><span class="text-slate-500">Mobile:</span> <strong id="tenantActivePhone" class="text-slate-800 ml-1"></strong></div>
+                            <div><span class="text-slate-500">Move-in Date:</span> <strong id="tenantActiveMoveIn" class="text-slate-800 ml-1"></strong></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                                <i class="fa-solid fa-receipt text-brand-600"></i> Payment History Ledger
+                            </h3>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs font-semibold text-slate-600">Year:</label>
+                                <select id="tenantYearSelect" onchange="renderTenantActiveLedger()" class="text-xs p-1.5 rounded-lg border border-slate-300 bg-white font-bold focus:outline-none">
+                                    <!-- Dynamic Years -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-xl border border-slate-200">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider">
+                                    <tr>
+                                        <th class="p-3">Month</th>
+                                        <th class="p-3">Base Rent</th>
+                                        <th class="p-3">Amount Paid</th>
+                                        <th class="p-3">Payment Mode</th>
+                                        <th class="p-3">Date</th>
+                                        <th class="p-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tenantLedgerBody" class="divide-y divide-slate-200 bg-white">
+                                    <!-- Dynamic content -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-3">
+                        <div class="text-xs text-amber-900">
+                            <strong>Need to clear outstanding rent?</strong> Pay via UPI ID <code class="font-bold bg-amber-200/60 px-1 rounded">7041724041@ybl</code>.
+                        </div>
+                        <button onclick="copyUPI()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm whitespace-nowrap">
+                            <i class="fa-solid fa-copy mr-1"></i> Copy UPI
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: OWNER PORTAL (SECURED) -->
+        <div id="tab-owner" class="tab-content hidden space-y-6">
+            
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear text-purple-600"></i> Owner Control Center
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Manage room profiles, log monthly payments, set room passwords, and export CSV reports.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="openTenantModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-user-plus"></i> Register Tenant
+                    </button>
+                    <button onclick="exportDataCSV()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-3 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-file-csv"></i> Export CSV
+                    </button>
+                    <button onclick="resetAllDataConfirmation()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold px-3 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                        <i class="fa-solid fa-arrows-rotate"></i> Reset All Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Rent Payment Entry Form -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2 border-b border-slate-100 pb-3">
+                    <i class="fa-solid fa-pen-to-square text-brand-600"></i> Record / Update Rent Payment Entry
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Select Year *</label>
+                        <select id="ownerEntryYear" onchange="ownerLoadSelectedEntry()" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 font-bold focus:outline-none bg-white">
+                            <!-- Dynamic Years -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Select Month *</label>
+                        <select id="ownerEntryMonth" onchange="ownerLoadSelectedEntry()" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 font-bold focus:outline-none bg-white">
+                            <option value="January">January</option>
+                            <option value="February">February</option>
+                            <option value="March">March</option>
+                            <option value="April">April</option>
+                            <option value="May">May</option>
+                            <option value="June">June</option>
+                            <option value="July">July</option>
+                            <option value="August">August</option>
+                            <option value="September">September</option>
+                            <option value="October">October</option>
+                            <option value="November">November</option>
+                            <option value="December">December</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Select Unit / Room *</label>
+                        <select id="ownerEntryUnit" onchange="ownerLoadSelectedEntry()" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 font-bold focus:outline-none bg-white">
+                            <!-- Dynamic Units -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Monthly Rent Due (₹)</label>
+                            <input type="number" id="entryBaseRent" placeholder="3500" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Amount Paid (₹)</label>
+                            <input type="number" id="entryAmountPaid" placeholder="3500" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Payment Mode</label>
+                            <select id="entryMode" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 font-semibold focus:outline-none bg-white">
+                                <option value="UPI">UPI</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Payment Status</label>
+                            <select id="entryStatus" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 font-semibold focus:outline-none bg-white">
+                                <option value="Paid">Paid</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Partial">Partial</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Payment Date</label>
+                            <input type="date" id="entryDate" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 font-semibold focus:outline-none bg-white">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Transaction Note (Optional)</label>
+                        <input type="text" id="entryNote" placeholder="e.g. Paid via PhonePe / Cash received by Savita" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none">
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <button onclick="saveOwnerRentEntry()" class="bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-floppy-disk"></i> Save & Persist Record
+                        </button>
+                        <button onclick="sendWhatsAppReceipt()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-brands fa-whatsapp"></i> WhatsApp Reminder / Receipt
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Directory Table -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-building text-brand-600"></i> Active Units & Room Passwords</span>
+                    <span id="directoryCountLabel" class="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full"></span>
+                </h3>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3">Unit</th>
+                                <th class="p-3">Tenant Name</th>
+                                <th class="p-3">Mobile</th>
+                                <th class="p-3">Base Rent</th>
+                                <th class="p-3">Room Password</th>
+                                <th class="p-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="directoryTableBody" class="divide-y divide-slate-200 bg-white">
+                            <!-- Dynamic Table Data -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- MODAL 1: OWNER LOGIN MODAL -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4 modal-blur">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900">Owner Authorization Required</h3>
+                <p class="text-xs text-slate-500 mt-1">Enter Master Owner Password to proceed.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+                    <input type="password" id="ownerLoginPassword" placeholder="Default: narshima2212" class="w-full text-xs p-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                </div>
+
+                <div id="loginError" class="hidden text-xs text-rose-600 font-bold text-center">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Invalid Password. Try again.
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="closeLoginModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition">
+                        Cancel
+                    </button>
+                    <button onclick="attemptLogin()" class="flex-1 bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold py-2.5 rounded-xl transition shadow-sm">
+                        Login
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CHANGE OWNER PASSWORD -->
+    <div id="changePasswordModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4 modal-blur">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+            <h3 class="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-key text-emerald-600"></i> Change Owner Password
+            </h3>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Current Owner Password</label>
+                    <input type="password" id="passCurrent" placeholder="Enter current password" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">New Password</label>
+                    <input type="password" id="passNew" placeholder="Enter new password" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Confirm New Password</label>
+                    <input type="password" id="passConfirm" placeholder="Confirm new password" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none">
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button onclick="closeChangePasswordModal()" class="flex-1 bg-slate-100 text-slate-700 text-xs font-bold py-2.5 rounded-xl">Cancel</button>
+                    <button onclick="saveNewOwnerPassword()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl transition">Update Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: REGISTER / EDIT TENANT -->
+    <div id="tenantModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4 modal-blur">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <h3 id="tenantModalTitle" class="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-emerald-600"></i> Register Tenant Profile
+            </h3>
+
+            <form id="tenantForm" onsubmit="event.preventDefault(); saveTenantForm();" class="space-y-3">
+                <input type="hidden" id="formOriginalUnit">
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Select Unit / Room *</label>
+                    <select id="formUnit" required class="w-full text-xs p-2.5 rounded-xl border border-slate-300 font-semibold focus:outline-none bg-white">
+                        <!-- Dynamic Units -->
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Tenant Full Name *</label>
+                        <input type="text" id="formName" required placeholder="Full Name" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Mobile Phone Number *</label>
+                        <input type="tel" id="formPhone" required placeholder="e.g. 7041724041" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none font-semibold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Monthly Base Rent (₹) *</label>
+                        <input type="number" id="formRent" required placeholder="e.g. 3500" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Room Access Password *</label>
+                        <input type="text" id="formRoomPassword" required placeholder="Default: tenant123" class="w-full text-xs p-2.5 rounded-xl border border-amber-300 bg-amber-50 focus:outline-none font-bold text-amber-900">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Security Deposit (₹)</label>
+                        <input type="number" id="formDeposit" placeholder="e.g. 5000" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Move-in / Lease Start Date</label>
+                        <input type="date" id="formStartDate" class="w-full text-xs p-2.5 rounded-xl border border-slate-300 focus:outline-none bg-white">
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-3">
+                    <button type="button" onclick="closeTenantModal()" class="flex-1 bg-slate-100 text-slate-700 text-xs font-bold py-2.5 rounded-xl">Cancel</button>
+                    <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl transition shadow-sm">Save Tenant</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 px-4 text-center border-t border-slate-800 mt-auto">
+        <p class="font-bold text-slate-300">Shiv Sadan (शिव सदन) Property Management System</p>
+        <p class="mt-1">Jadeshwar Park Street No. 2, Near Radha Krishna Mandir, Rajkot, Gujarat</p>
+        <p class="mt-1 text-slate-500">Contact: Savita Vaniya / Yashraj | Phone: +91 7041724041 | UPI: 7041724041@ybl</p>
+    </footer>
+
+    <script>
+        const MASTER_STORAGE_KEY = "SHIV_SADAN_MASTER_DB_V3";
+        const DEFAULT_OWNER_PASS = "narshima2212";
+        const DEFAULT_ROOM_PASS = "tenant123";
+        const YEARS = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
+        const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+        const UNITS = [];
+        for (let i = 1; i <= 15; i++) UNITS.push(`Room ${i}`);
+        UNITS.push("Store 1", "Store 2");
+
+        let db = {
+            ownerPassword: DEFAULT_OWNER_PASS,
+            tenants: {}, // { "Room 1": { name, phone, rent, roomPassword, deposit, startDate } }
+            ledgers: {}  // { "2026_March_Room 1": { baseRent, amountPaid, mode, status, date, note } }
+        };
+
+        let isOwnerLoggedIn = false;
+        let authenticatedTenantUnit = null;
+
+        // Centralized App Initialization
+        window.onload = function() {
+            loadDatabase();
+            initializeDropdowns();
+            checkOwnerSession();
+
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById("entryDate").value = today;
+
+            renderAllViews();
+        };
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            const bgColor = type === "success" ? "bg-emerald-600" : (type === "error" ? "bg-rose-600" : "bg-slate-800");
+
+            toast.className = `${bgColor} text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 transform transition-all duration-300`;
+            toast.innerHTML = `<i class="${type === 'success' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'}"></i> ${message}`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "translate-y-2");
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Centralized Storage Read & Write
+        function loadDatabase() {
+            const raw = localStorage.getItem(MASTER_STORAGE_KEY);
+            if (raw) {
+                try {
+                    db = JSON.parse(raw);
+                    if (!db.ownerPassword) db.ownerPassword = DEFAULT_OWNER_PASS;
+                    if (!db.tenants) db.tenants = {};
+                    if (!db.ledgers) db.ledgers = {};
+                } catch (e) {
+                    console.error("Storage corrupted. Re-initializing master DB.", e);
+                    saveData();
+                }
+            } else {
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(MASTER_STORAGE_KEY, JSON.stringify(db));
+            renderAllViews();
+        }
+
+        function renderAllViews() {
+            renderOverviewMetrics();
+            renderDirectoryTable();
+            if (authenticatedTenantUnit) renderTenantActiveLedger();
+            ownerLoadSelectedEntry();
+        }
+
+        function initializeDropdowns() {
+            const currentYear = new Date().getFullYear();
+            const currentMonthIndex = new Date().getMonth();
+            const currentMonthName = MONTHS[currentMonthIndex];
+
+            // Render Units
+            const unitSelects = [
+                document.getElementById("tenantSelectUnit"),
+                document.getElementById("ownerEntryUnit"),
+                document.getElementById("formUnit")
+            ];
+
+            unitSelects.forEach(select => {
+                if (!select) return;
+                select.innerHTML = '<option value="">-- Choose Unit --</option>';
+                UNITS.forEach(unit => {
+                    const opt = document.createElement("option");
+                    opt.value = unit;
+                    opt.textContent = unit;
+                    select.appendChild(opt);
+                });
+            });
+
+            // Render Years
+            const yearSelects = [
+                document.getElementById("overviewYearSelect"),
+                document.getElementById("tenantYearSelect"),
+                document.getElementById("ownerEntryYear")
+            ];
+
+            yearSelects.forEach(select => {
+                if (!select) return;
+                select.innerHTML = '';
+                YEARS.forEach(yr => {
+                    const opt = document.createElement("option");
+                    opt.value = yr;
+                    opt.textContent = yr;
+                    if (yr === currentYear) opt.selected = true;
+                    select.appendChild(opt);
+                });
+            });
+
+            // Render Months
+            const monthSelects = [
+                document.getElementById("overviewMonthSelect"),
+                document.getElementById("ownerEntryMonth")
+            ];
+
+            monthSelects.forEach(select => {
+                if (!select) return;
+                select.innerHTML = '';
+                MONTHS.forEach(m => {
+                    const opt = document.createElement("option");
+                    opt.value = m;
+                    opt.textContent = m;
+                    if (m === currentMonthName) opt.selected = true;
+                    select.appendChild(opt);
+                });
+            });
+        }
+
+        function checkOwnerSession() {
+            if (sessionStorage.getItem("shivsadan_owner_logged_in") === "true") {
+                isOwnerLoggedIn = true;
+                document.getElementById("ownerStatusBar").classList.remove("hidden");
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+            document.querySelectorAll("nav button").forEach(btn => btn.classList.remove("active-tab"));
+
+            document.getElementById("tab-" + tabId).classList.remove("hidden");
+            const targetBtn = document.getElementById("btn-" + tabId);
+            if (targetBtn) targetBtn.classList.add("active-tab");
+
+            if (tabId === 'home') renderOverviewMetrics();
+            if (tabId === 'owner' && isOwnerLoggedIn) {
+                renderDirectoryTable();
+                ownerLoadSelectedEntry();
+            }
+        }
+
+        function handleOwnerNav() {
+            if (isOwnerLoggedIn) {
+                switchTab("owner");
+            } else {
+                openLoginModal();
+            }
+        }
+
+        function openLoginModal() {
+            document.getElementById("loginModal").classList.remove("hidden");
+            document.getElementById("loginModal").classList.add("flex");
+            document.getElementById("loginError").classList.add("hidden");
+            document.getElementById("ownerLoginPassword").value = "";
+        }
+
+        function closeLoginModal() {
+            document.getElementById("loginModal").classList.add("hidden");
+            document.getElementById("loginModal").classList.remove("flex");
+        }
+
+        function attemptLogin() {
+            const entered = document.getElementById("ownerLoginPassword").value;
+            if (entered === db.ownerPassword) {
+                isOwnerLoggedIn = true;
+                sessionStorage.setItem("shivsadan_owner_logged_in", "true");
+                document.getElementById("ownerStatusBar").classList.remove("hidden");
+                closeLoginModal();
+                switchTab("owner");
+                showToast("Welcome Savita/Yashraj! Owner Dashboard Unlocked.");
+            } else {
+                document.getElementById("loginError").classList.remove("hidden");
+            }
+        }
+
+        function ownerLogout() {
+            isOwnerLoggedIn = false;
+            sessionStorage.removeItem("shivsadan_owner_logged_in");
+            document.getElementById("ownerStatusBar").classList.add("hidden");
+            switchTab("home");
+            showToast("Owner Session Locked Successfully.", "info");
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById("changePasswordModal").classList.remove("hidden");
+            document.getElementById("changePasswordModal").classList.add("flex");
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById("changePasswordModal").classList.add("hidden");
+            document.getElementById("changePasswordModal").classList.remove("flex");
+        }
+
+        function saveNewOwnerPassword() {
+            const curr = document.getElementById("passCurrent").value;
+            const newP = document.getElementById("passNew").value;
+            const conf = document.getElementById("passConfirm").value;
+
+            if (curr !== db.ownerPassword) {
+                showToast("Current password is incorrect.", "error");
+                return;
+            }
+            if (!newP || newP.length < 4) {
+                showToast("New password must be at least 4 characters long.", "error");
+                return;
+            }
+            if (newP !== conf) {
+                showToast("New password confirmation does not match.", "error");
+                return;
+            }
+
+            db.ownerPassword = newP;
+            saveData();
+            showToast("Owner password changed successfully!");
+            closeChangePasswordModal();
+        }
+
+        function copyUPI() {
+            const upi = "7041724041@ybl";
+            const el = document.createElement('textarea');
+            el.value = upi;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast("UPI ID copied: " + upi);
+        }
+
+        function authenticateTenant() {
+            const unit = document.getElementById("tenantSelectUnit").value;
+            const pass = document.getElementById("tenantRoomPassword").value;
+            const err = document.getElementById("tenantAuthError");
+
+            if (!unit) {
+                showToast("Please select a room/store unit.", "error");
+                return;
+            }
+
+            const tenantData = db.tenants[unit];
+            const validPassword = (tenantData && tenantData.roomPassword) ? tenantData.roomPassword : DEFAULT_ROOM_PASS;
+
+            if (pass === validPassword) {
+                err.classList.add("hidden");
+                authenticatedTenantUnit = unit;
+
+                document.getElementById("tenantAuthBox").classList.add("hidden");
+                document.getElementById("tenantDashboardView").classList.remove("hidden");
+
+                document.getElementById("tenantActiveUnitTitle").innerText = `${unit} Access Granted`;
+                document.getElementById("tenantActiveName").innerText = tenantData ? tenantData.name : 'Unregistered Room';
+                document.getElementById("tenantActiveRent").innerText = tenantData ? "₹" + tenantData.rent : 'N/A';
+                document.getElementById("tenantActivePhone").innerText = tenantData ? tenantData.phone : 'N/A';
+                document.getElementById("tenantActiveMoveIn").innerText = tenantData ? (tenantData.startDate || 'N/A') : 'N/A';
+
+                renderTenantActiveLedger();
+                showToast(`Logged into ${unit} successfully.`);
+            } else {
+                err.classList.remove("hidden");
+            }
+        }
+
+        function lockTenantView() {
+            authenticatedTenantUnit = null;
+            document.getElementById("tenantRoomPassword").value = "";
+            document.getElementById("tenantAuthBox").classList.remove("hidden");
+            document.getElementById("tenantDashboardView").classList.add("hidden");
+            showToast("Tenant session locked.", "info");
+        }
+
+        function renderTenantActiveLedger() {
+            if (!authenticatedTenantUnit) return;
+            const year = document.getElementById("tenantYearSelect").value;
+            const tbody = document.getElementById("tenantLedgerBody");
+            tbody.innerHTML = '';
+
+            MONTHS.forEach(m => {
+                const key = `${year}_${m}_${authenticatedTenantUnit}`;
+                const record = db.ledgers[key];
+                const tr = document.createElement("tr");
+
+                if (record) {
+                    let badgeClass = "bg-amber-100 text-amber-800";
+                    if (record.status === "Paid") badgeClass = "bg-emerald-100 text-emerald-800";
+                    if (record.status === "Pending") badgeClass = "bg-rose-100 text-rose-800";
+
+                    tr.innerHTML = `
+                        <td class="p-3 font-semibold text-slate-800">${m}</td>
+                        <td class="p-3 font-bold text-slate-700">₹${record.baseRent}</td>
+                        <td class="p-3 font-bold text-emerald-700">₹${record.amountPaid || 0}</td>
+                        <td class="p-3 text-slate-600">${record.mode || 'UPI'}</td>
+                        <td class="p-3 text-slate-600">${record.date || 'N/A'}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${record.status}</span></td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="p-3 font-medium text-slate-600">${m}</td>
+                        <td class="p-3 text-slate-400">-</td>
+                        <td class="p-3 text-slate-400">-</td>
+                        <td class="p-3 text-slate-400">-</td>
+                        <td class="p-3 text-slate-400">-</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-500">Unrecorded</span></td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openTenantModal(unit = null) {
+            if (!isOwnerLoggedIn) return;
+            document.getElementById("tenantModal").classList.remove("hidden");
+            document.getElementById("tenantModal").classList.add("flex");
+
+            const form = document.getElementById("tenantForm");
+            form.reset();
+
+            if (unit) {
+                const t = db.tenants[unit];
+                if (t) {
+                    document.getElementById("tenantModalTitle").innerHTML = `<i class="fa-solid fa-pen-to-square text-brand-600"></i> Edit Tenant (${unit})`;
+                    document.getElementById("formOriginalUnit").value = unit;
+                    document.getElementById("formUnit").value = unit;
+                    document.getElementById("formName").value = t.name || '';
+                    document.getElementById("formPhone").value = t.phone || '';
+                    document.getElementById("formRent").value = t.rent || '';
+                    document.getElementById("formRoomPassword").value = t.roomPassword || DEFAULT_ROOM_PASS;
+                    document.getElementById("formDeposit").value = t.deposit || '';
+                    document.getElementById("formStartDate").value = t.startDate || '';
+                }
+            } else {
+                document.getElementById("tenantModalTitle").innerHTML = `<i class="fa-solid fa-user-plus text-emerald-600"></i> Register Tenant Profile`;
+                document.getElementById("formOriginalUnit").value = '';
+                document.getElementById("formRoomPassword").value = DEFAULT_ROOM_PASS;
+            }
+        }
+
+        function closeTenantModal() {
+            document.getElementById("tenantModal").classList.add("hidden");
+            document.getElementById("tenantModal").classList.remove("flex");
+        }
+
+        function saveTenantForm() {
+            const originalUnit = document.getElementById("formOriginalUnit").value;
+            const unit = document.getElementById("formUnit").value;
+            const roomPass = document.getElementById("formRoomPassword").value.trim() || DEFAULT_ROOM_PASS;
+
+            if (!unit) {
+                showToast("Please select a room/store unit.", "error");
+                return;
+            }
+
+            const tenantObj = {
+                unit,
+                name: document.getElementById("formName").value.trim(),
+                phone: document.getElementById("formPhone").value.trim(),
+                rent: parseFloat(document.getElementById("formRent").value) || 0,
+                roomPassword: roomPass,
+                deposit: parseFloat(document.getElementById("formDeposit").value) || 0,
+                startDate: document.getElementById("formStartDate").value
+            };
+
+            if (originalUnit && originalUnit !== unit) {
+                delete db.tenants[originalUnit];
+            }
+
+            db.tenants[unit] = tenantObj;
+            saveData(); // Triggers instant persistent save and live UI re-render
+
+            showToast(`Tenant saved for ${unit}!`);
+            closeTenantModal();
+        }
+
+        function deleteTenant(unit) {
+            if (!isOwnerLoggedIn) return;
+            if (confirm(`Are you sure you want to remove tenant record from ${unit}?`)) {
+                delete db.tenants[unit];
+                saveData();
+                showToast(`Tenant removed from ${unit}.`);
+            }
+        }
+
+        function renderDirectoryTable() {
+            const tbody = document.getElementById("directoryTableBody");
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            let count = 0;
+
+            UNITS.forEach(u => {
+                const t = db.tenants[u];
+                const roomPass = (t && t.roomPassword) ? t.roomPassword : DEFAULT_ROOM_PASS;
+                const tr = document.createElement("tr");
+
+                if (t) {
+                    count++;
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-slate-800">${u}</td>
+                        <td class="p-3 font-semibold text-slate-900">${t.name}</td>
+                        <td class="p-3 text-slate-600">${t.phone || 'N/A'}</td>
+                        <td class="p-3 font-bold text-emerald-700">₹${t.rent}</td>
+                        <td class="p-3"><code class="bg-amber-100 text-amber-900 font-bold px-2 py-0.5 rounded text-[11px]">${roomPass}</code></td>
+                        <td class="p-3 flex gap-2">
+                            <button onclick="openTenantModal('${u}')" class="bg-brand-50 hover:bg-brand-100 text-brand-700 px-2.5 py-1 rounded-lg text-[11px] font-bold transition">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </button>
+                            <button onclick="deleteTenant('${u}')" class="bg-rose-50 hover:bg-rose-100 text-rose-700 px-2.5 py-1 rounded-lg text-[11px] font-bold transition">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="p-3 font-bold text-slate-800">${u}</td>
+                        <td class="p-3 text-slate-400 italic" colspan="3">Vacant / Available for Lease</td>
+                        <td class="p-3"><code class="bg-slate-100 text-slate-500 font-semibold px-2 py-0.5 rounded text-[11px]">${roomPass}</code></td>
+                        <td class="p-3">
+                            <button onclick="openTenantModal()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg text-[11px] font-bold transition">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+
+            const countLbl = document.getElementById("directoryCountLabel");
+            if (countLbl) countLbl.innerText = `${count} Occupied / ${UNITS.length} Total`;
+        }
+
+        function ownerLoadSelectedEntry() {
+            const yearEl = document.getElementById("ownerEntryYear");
+            const monthEl = document.getElementById("ownerEntryMonth");
+            const unitEl = document.getElementById("ownerEntryUnit");
+
+            if (!yearEl || !monthEl || !unitEl) return;
+
+            const year = yearEl.value;
+            const month = monthEl.value;
+            const unit = unitEl.value;
+
+            if (!unit) return;
+
+            const t = db.tenants[unit];
+            const defaultBase = t ? t.rent : 0;
+
+            const key = `${year}_${month}_${unit}`;
+            const record = db.ledgers[key];
+
+            if (record) {
+                document.getElementById("entryBaseRent").value = record.baseRent;
+                document.getElementById("entryAmountPaid").value = record.amountPaid || 0;
+                document.getElementById("entryMode").value = record.mode || 'UPI';
+                document.getElementById("entryStatus").value = record.status;
+                document.getElementById("entryDate").value = record.date || new Date().toISOString().split('T')[0];
+                document.getElementById("entryNote").value = record.note || '';
+            } else {
+                document.getElementById("entryBaseRent").value = defaultBase;
+                document.getElementById("entryAmountPaid").value = defaultBase;
+                document.getElementById("entryMode").value = 'UPI';
+                document.getElementById("entryStatus").value = 'Paid';
+                document.getElementById("entryDate").value = new Date().toISOString().split('T')[0];
+                document.getElementById("entryNote").value = '';
+            }
+        }
+
+        function saveOwnerRentEntry() {
+            if (!isOwnerLoggedIn) return;
+
+            const year = document.getElementById("ownerEntryYear").value;
+            const month = document.getElementById("ownerEntryMonth").value;
+            const unit = document.getElementById("ownerEntryUnit").value;
+
+            if (!unit) {
+                showToast("Please select a room/store unit.", "error");
+                return;
+            }
+
+            const baseRent = parseFloat(document.getElementById("entryBaseRent").value) || 0;
+            const amountPaid = parseFloat(document.getElementById("entryAmountPaid").value) || 0;
+            const mode = document.getElementById("entryMode").value;
+            const status = document.getElementById("entryStatus").value;
+            const date = document.getElementById("entryDate").value;
+            const note = document.getElementById("entryNote").value.trim();
+
+            const key = `${year}_${month}_${unit}`;
+            db.ledgers[key] = { baseRent, amountPaid, mode, status, date, note };
+
+            saveData(); // Save & instant live re-render
+            showToast(`Rent entry saved for ${unit} (${month} ${year})!`);
+        }
+
+        function sendWhatsAppReceipt() {
+            const year = document.getElementById("ownerEntryYear").value;
+            const month = document.getElementById("ownerEntryMonth").value;
+            const unit = document.getElementById("ownerEntryUnit").value;
+            const baseRent = document.getElementById("entryBaseRent").value;
+            const amountPaid = document.getElementById("entryAmountPaid").value;
+            const status = document.getElementById("entryStatus").value;
+
+            if (!unit) {
+                showToast("Please select a unit.", "error");
+                return;
+            }
+
+            const t = db.tenants[unit];
+            const targetPhone = (t && t.phone) ? t.phone : '7041724041';
+
+            const msg = `*Shiv Sadan - Rent Notice/Receipt*%0A` +
+                        `----------------------------------%0A` +
+                        `*Unit:* ${unit}%0A` +
+                        `*Period:* ${month} ${year}%0A` +
+                        `*Monthly Rent:* ₹${baseRent}%0A` +
+                        `*Amount Received:* ₹${amountPaid}%0A` +
+                        `*Status:* ${status}%0A` +
+                        `*Official UPI ID:* 7041724041@ybl%0A` +
+                        `----------------------------------%0A` +
+                        `*Management:* Savita Vaniya / Yashraj`;
+
+            window.open(`https://wa.me/91${targetPhone}?text=${msg}`, '_blank');
+        }
+
+        function renderOverviewMetrics() {
+            const yearEl = document.getElementById("overviewYearSelect");
+            const monthEl = document.getElementById("overviewMonthSelect");
+
+            if (!yearEl || !monthEl) return;
+
+            const year = yearEl.value || new Date().getFullYear();
+            const month = monthEl.value || MONTHS[new Date().getMonth()];
+
+            let occupied = 0;
+            let expectedTotal = 0;
+            let collectedTotal = 0;
+            let pendingCount = 0;
+
+            UNITS.forEach(u => {
+                const t = db.tenants[u];
+                if (t) {
+                    occupied++;
+                    const rent = parseFloat(t.rent) || 0;
+                    expectedTotal += rent;
+
+                    const key = `${year}_${month}_${u}`;
+                    const rec = db.ledgers[key];
+
+                    if (rec) {
+                        collectedTotal += (parseFloat(rec.amountPaid) || 0);
+                        if (rec.status === 'Pending' || rec.status === 'Partial') {
+                            pendingCount++;
+                        }
+                    } else {
+                        pendingCount++;
+                    }
+                }
+            });
+
+            document.getElementById("statOccupied").innerText = occupied;
+            document.getElementById("statExpected").innerText = "₹" + expectedTotal.toLocaleString('en-IN');
+            document.getElementById("statCollected").innerText = "₹" + collectedTotal.toLocaleString('en-IN');
+            document.getElementById("statOverdue").innerText = pendingCount;
+        }
+
+        function exportDataCSV() {
+            let csv = "Unit,Tenant Name,Mobile Phone,Monthly Base Rent,Room Password,Move In Date\n";
+
+            UNITS.forEach(u => {
+                const t = db.tenants[u];
+                const pass = (t && t.roomPassword) ? t.roomPassword : DEFAULT_ROOM_PASS;
+                if (t) {
+                    csv += `"${t.unit}","${t.name}","${t.phone || ''}","${t.rent}","${pass}","${t.startDate || ''}"\n`;
+                } else {
+                    csv += `"${u}","Vacant","","","${pass}",""\n`;
+                }
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `Shiv_Sadan_Directory_${new Date().toISOString().split('T')[0]}.csv`);
+            a.click();
+            showToast("CSV Export downloaded.");
+        }
+
+        function resetAllDataConfirmation() {
+            if (confirm("DANGER: Are you sure you want to reset all tenants and payment records? This cannot be undone.")) {
+                db = {
+                    ownerPassword: DEFAULT_OWNER_PASS,
+                    tenants: {},
+                    ledgers: {}
+                };
+                saveData();
+                showToast("All data reset to initial state.", "error");
+            }
+        }
+    </script>
+</body>
+</html>
